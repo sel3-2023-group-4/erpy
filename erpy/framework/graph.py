@@ -9,6 +9,14 @@ if TYPE_CHECKING:
     pass
 
 
+def unfold_list(nodes: List[DirectedNode]) -> [Specification]:
+    specifications = []
+    for node in nodes:
+        specification = node.unfold()
+        specifications.extend([specification] * (node.repeated + 1))
+    return specifications
+
+
 class DirectedGraph(metaclass=abc.ABCMeta):
     def __init__(self) -> None:
         pass
@@ -16,14 +24,6 @@ class DirectedGraph(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def unfold(self) -> Specification:
         raise NotImplementedError
-
-    @staticmethod
-    def unfold_list(nodes: List[DirectedNode]) -> [Specification]:
-        specifications = []
-        for node in nodes:
-            specification = node.unfold()
-            specifications.extend([specification] * (node.repeated + 1))
-        return specification
 
 
 class DirectedNode(metaclass=abc.ABCMeta):
