@@ -11,25 +11,26 @@ if TYPE_CHECKING:
 
 class DirectedGraph(metaclass=abc.ABCMeta):
     def __init__(self) -> None:
-        self.root = None
-
-    def parameterize(self, root: DirectedNode) -> None:
-        self.root = root
-        to_visit: List[DirectedNode] = [root]
-        while len(to_visit) > 0:
-            node: DirectedNode = to_visit.pop()
-            node.parameterize()
-            to_visit.extend(node.next)
+        pass
 
     @abc.abstractmethod
     def unfold(self) -> Specification:
         raise NotImplementedError
 
+    @staticmethod
+    def unfold_list(nodes: List[DirectedNode]) -> [Specification]:
+        specifications = []
+        for node in nodes:
+            specification = node.unfold()
+            specifications.extend([specification] * (node.repeated + 1))
+        return specification
+
 
 class DirectedNode(metaclass=abc.ABCMeta):
-    def __init__(self) -> None:
-        self.next: List[DirectedNode] = []
+    def __init__(self, repeated: int = 0) -> None:
+        # number of times a node points to itself
+        self.repeated: int = repeated
 
     @abc.abstractmethod
-    def parameterize(self) -> None:
+    def unfold(self) -> Specification:
         raise NotImplementedError
