@@ -10,6 +10,19 @@ if TYPE_CHECKING:
     pass
 
 
+def flatten(lst):
+    flattened_lst = []
+    stack = list(lst)
+    while stack:
+        item = stack.pop()
+        if isinstance(item, list):
+            stack.extend(item)
+        else:
+            flattened_lst.append(item)
+    flattened_lst.reverse()
+    return flattened_lst
+
+
 class Specification(metaclass=abc.ABCMeta):
     def __init__(self) -> None:
         pass
@@ -21,10 +34,18 @@ class Specification(metaclass=abc.ABCMeta):
             field = self.__getattribute__(field_name)
             if isinstance(field, Parameter):
                 parameters.append(field)
+            elif isinstance(field, List):
+                for spec in flatten(field):
+                    if isinstance(spec, Specification) and type(self) != type(spec):
+                        parameters += spec.parameters
+                    elif isinstance(spec, Parameter):
+                        parameters.append(spec)
             elif isinstance(field, Iterable) and not isinstance(field, str):
                 for spec in field:
-                    if isinstance(spec, Specification):
+                    if isinstance(spec, Specification) and type(self) != type(spec):
                         parameters += spec.parameters
+                    elif isinstance(spec, Parameter):
+                        parameters.append(spec)
             elif isinstance(field, Specification):
                 parameters += field.parameters
         return parameters
