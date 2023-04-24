@@ -5,7 +5,8 @@ import copy
 from typing import List, TYPE_CHECKING
 
 from erpy import random_state
-from erpy.framework.parameters import FixedParameter, SynchronizedParameter, Parameter, ContinuousParameter
+from erpy.framework.parameters import FixedParameter, SynchronizedParameter, Parameter, ContinuousParameter, \
+    DiscreteParameter
 from erpy.framework.specification import Specification
 
 if TYPE_CHECKING:
@@ -55,6 +56,9 @@ class DirectedNode(metaclass=abc.ABCMeta):
                 pars.append(var)
         return pars
 
+    def is_recursive(self) -> bool:
+        return self.repeated > 0
+
     def generate(self):
         for par in self.mutable_parameters:
             par.set_random_value()
@@ -62,6 +66,11 @@ class DirectedNode(metaclass=abc.ABCMeta):
             child.generate()
 
     def mutate(self):
+        self.mutate_mutable_parameters()
+        for child in self.children:
+            child.mutate()
+
+    def mutate_mutable_parameters(self):
         for par in self.mutable_parameters:
             if isinstance(par, ContinuousParameter):
                 value_range = par.high - par.low
