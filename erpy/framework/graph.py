@@ -35,6 +35,20 @@ class DirectedGraph(metaclass=abc.ABCMeta):
         graph.root.mutate()
         return graph
 
+    def get_labels_and_values(self, node: DirectedNode):
+        """
+        Get labels and parameters for this node and all its children.
+        """
+        pars = []
+        for name in vars(node):
+            var = node.__getattribute__(name)
+            if isinstance(var, Parameter) and not (
+                    isinstance(var, FixedParameter) or isinstance(var, SynchronizedParameter)):
+                pars.append((node.__class__.__name__ + "-" + str(hash(node)) + "/" + name, var.value))
+        for child in node.children:
+            pars.extend(self.get_labels_and_values(child))
+        return pars
+
     @abc.abstractmethod
     def unfold(self) -> Specification:
         raise NotImplementedError
