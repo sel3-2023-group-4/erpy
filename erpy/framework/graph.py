@@ -35,7 +35,7 @@ class DirectedGraph(metaclass=abc.ABCMeta):
         graph.root.mutate()
         return graph
 
-    def get_labels_and_values(self, node: DirectedNode):
+    def get_labels_and_values(self, node: DirectedNode, idx: int = 0):
         """
         Get labels and parameters for this node and all its children.
         """
@@ -44,9 +44,15 @@ class DirectedGraph(metaclass=abc.ABCMeta):
             var = node.__getattribute__(name)
             if isinstance(var, Parameter) and not (
                     isinstance(var, FixedParameter) or isinstance(var, SynchronizedParameter)):
-                pars.append((node.__class__.__name__ + "-" + str(hash(node)) + "/" + name, var.value))
+                pars.append((node.__class__.__name__ + "_" + str(idx) + "_" + name, var.value))
+        j = 0
         for child in node.children:
-            pars.extend(self.get_labels_and_values(child))
+            pars.extend(self.get_labels_and_values(child, idx=j))
+            i = 1
+            while i <= node.repeated:
+                pars.extend(self.get_labels_and_values(child, idx=j + i))
+                i += 1
+            j += i
         return pars
 
     @abc.abstractmethod
