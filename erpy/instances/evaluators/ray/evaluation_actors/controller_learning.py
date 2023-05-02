@@ -5,6 +5,8 @@ import gym.vector
 import ray
 from stable_baselines3.common.evaluation import evaluate_policy
 
+from controller_optimization.q_learning_controller.specification import QLearnControllerSpecification
+from controller_optimization.robot.specification import BrittleStarRobotSpecification
 from erpy.framework.ea import EAConfig
 from erpy.framework.evaluator import EvaluationResult, EvaluationActor
 from erpy.framework.genome import Genome
@@ -64,13 +66,17 @@ def ray_controller_learning_evaluation_actor_factory(config: EAConfig) -> Type[E
                                    callback=self._callback)
             environment.close()
 
-        def evaluate(self, genome: Genome, analyze: bool = False) -> EvaluationResult:
+        def evaluate(self, genome: Genome, rl_specification: QLearnControllerSpecification = None, analyze: bool = False) -> EvaluationResult:
             shared_callback_data = dict()
             self._callback.before_evaluation(config=self._ea_config, shared_callback_data=shared_callback_data)
 
             self._callback.from_genome(genome)
 
-            robot = self.config.robot(specification=genome.specification)
+            if rl_specification is not None:
+                specification = BrittleStarRobotSpecification(genome.specification.morphology_specification, rl_specification)
+                robot = self.config.robot(specification=specification)
+            else:
+                robot = self.config.robot(specification=genome.specification)
             self._callback.from_robot(robot=robot)
 
             # Always set the environment one time first

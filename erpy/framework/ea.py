@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional, List, Tuple, Dict, Any
 
+from controller_optimization.q_learning_controller.specification import QLearnControllerSpecification
+from controller_optimization.robot.specification import BrittleStarRobotSpecification
 from erpy.framework.evaluator import EvaluatorConfig, Evaluator, EvaluationResult
 from erpy.framework.genome import Genome, DummyGenome
 from erpy.framework.logger import LoggerConfig, Logger
@@ -19,6 +21,7 @@ class EAConfig:
     reproducer_config: ReproducerConfig
     logger_config: LoggerConfig
     saver_config: SaverConfig
+    rl_specification: QLearnControllerSpecification = None
 
     cli_args: Optional[Dict[str, Any]] = None
     checkpoint_path: str = None
@@ -60,6 +63,7 @@ class EA:
         self.logger = self.config.logger
         self.saver = self.config.saver
         self.evaluator = self.config.evaluator
+        self.rl_specification = self.config.rl_specification
 
     @property
     def config(self) -> EAConfig:
@@ -81,7 +85,7 @@ class EA:
             self.reproducer.reproduce(population=self.population)
             self.population.after_reproduction()
             self.population.before_evaluation()
-            self.evaluator.evaluate(population=self.population)
+            self.evaluator.evaluate(population=self.population, rl_specification=self.rl_specification)
             self.population.after_evaluation()
             self.population.before_logging()
             self.logger.log(population=self.population)

@@ -9,6 +9,7 @@ import ray.actor
 from ray.util import ActorPool
 from tqdm import tqdm
 
+from controller_optimization.q_learning_controller.specification import QLearnControllerSpecification
 from erpy.framework.ea import EAConfig
 from erpy.framework.evaluator import EvaluatorConfig, EvaluationActor, Evaluator
 from erpy.framework.population import Population
@@ -66,7 +67,7 @@ class RayDistributedEvaluator(Evaluator):
                    range(self.config.num_workers)]
         self.pool = ActorPool(workers)
 
-    def evaluate(self, population: Population) -> None:
+    def evaluate(self, population: Population, rl_specification: QLearnControllerSpecification = None) -> None:
         all_genomes = population.genomes
         target_genome_ids = population.to_evaluate
 
@@ -75,7 +76,7 @@ class RayDistributedEvaluator(Evaluator):
         for genome in tqdm(target_genomes,
                            desc=f"[RayDistributedEvaluator] Generation {population.generation}\t-\tSending jobs to workers"):
             self.pool.submit(
-                lambda worker, genome: worker.evaluate.remote(genome=genome), genome)
+                lambda worker, genome: worker.evaluate.remote(genome=genome, rl_specification=rl_specification), genome)
             population.under_evaluation.add(genome.genome_id)
 
         pbar = tqdm(
