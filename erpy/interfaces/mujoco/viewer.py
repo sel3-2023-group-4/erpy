@@ -4,10 +4,11 @@ import numpy as np
 from dm_control import viewer
 from dm_env import TimeStep
 
-from erpy.interfaces.mujoco.environment import MJCEnvironmentConfig, dm_control_to_gym_environment, DiscreteActions
+from erpy.interfaces.mujoco.environment import MJCEnvironmentConfig, dm_control_to_gym_environment
 from erpy.interfaces.mujoco.gym_wrapper import get_clean_obs, vectorize_observations
 from erpy.interfaces.mujoco.phenome import MJCRobot
 from stable_baselines_integration.robot.controller import PPOMJCEnvironmentConfig
+from stable_baselines_integration.robot.discrete_actions_wrapper import DiscreteActions
 
 
 def evaluate_with_dm_control_viewer(env_config: MJCEnvironmentConfig, robot: MJCRobot) -> None:
