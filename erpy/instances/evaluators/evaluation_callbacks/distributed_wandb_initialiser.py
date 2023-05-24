@@ -7,11 +7,11 @@ from erpy.instances.loggers.wandb_logger import WandBLoggerConfig
 
 
 class DistributedWandbInitialisationEvaluationCallback(EvaluationCallback):
-    def __init__(self, initialise_wandb_tensorboard=True) -> None:
+    def __init__(self, sync_tensorboard=True) -> None:
         super().__init__()
 
         self._wandb_run = None
-        self._initialise_wandb_tensorboard = initialise_wandb_tensorboard
+        self._sync_tensorboard = sync_tensorboard
 
     @property
     def config(self) -> RayControllerLearningEvaluatorConfig:
@@ -31,7 +31,7 @@ class DistributedWandbInitialisationEvaluationCallback(EvaluationCallback):
         name = f"{self.logger_config.run_name}-genome-{genome_id}"
         self._wandb_run = wandb.init(project=project_name, group=group, tags=tags, name=name,
                                      resume="allow", id=name,
-                                     sync_tensorboard=self._initialise_wandb_tensorboard)
+                                     sync_tensorboard=self._sync_tensorboard)
 
     def from_genome(self, genome: Genome) -> None:
         self._initialise_wandb(genome.genome_id)
