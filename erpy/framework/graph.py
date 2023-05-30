@@ -35,8 +35,7 @@ class DirectedGraph(metaclass=abc.ABCMeta):
     """
     A directed graph used for indirect genetic encodings.
 
-    :var root: the root of the graph (this root should link to the other nodes
-               of the graph.
+    :var root: the root of the graph (this root should link to the other nodes of the graph).
     """
     def __init__(self, root: DirectedNode) -> None:
         self.root = root
